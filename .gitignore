@@ -47,6 +47,7 @@ images/
 # ===== my_learn 内的日志与产物（保留 .py / .html / eval）=====
 my_learn/**/*.txt
 my_learn/output/
+my_learn/*_output/
 
 # ===== 根目录临时脚本与求职材料 =====
 troch_gpu_test.py

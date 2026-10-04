@@ -33,11 +33,11 @@ class NodeAnswerOutput(NodeBase):
         4 把答案写入到mongodb的history中 利用utils/mongo_history_utils.py中的save_chat_message方法
         5 做最后一次push操作（主要是为了触发前端图片渲染)
              {
-                "answer": "HAK 180 烫金机的操作面板位于...（大模型生成的纯文本）...",
+                "answer": "DCNN 频谱感知方法的网络结构为...（大模型生成的纯文本）...",
                 "status": "completed",
                 "image_urls": [
-                    "http://local-server/images/panel_view.jpg",
-                    "http://local-server/images/button_detail.jpg"
+                    "http://local-server/images/block.jpg",
+                    "http://local-server/images/network.jpg"
                 ]
               }
         """
@@ -310,7 +310,7 @@ class NodeAnswerOutput(NodeBase):
                 # 正则表达式 r'!\[.*?\]\((.*?)\)' 中包含一个捕获组 (.*?)
                 # 当存在捕获组时，findall 只返回括号内匹配到的内容（即 URL），而不是整个 ![...](...) 字符串
                 # 示例：
-                # 输入 text: "参考图片 ![面板图](http://img.com/1.jpg) 如下"
+                # 输入 text: "参考图片 ![网络结构图](http://img.com/1.jpg) 如下"
                 # 返回 matches: ['http://img.com/1.jpg']
                 matches = md_img_pattern.findall(text)
                 for img_url in matches:
@@ -360,50 +360,50 @@ if __name__ == "__main__":
         {
             "chunk_id": "local_101",
             "source": "local",
-            "title": "HAK 180 烫金机操作手册_v2",
+            "title": "基于深度卷积神经网络的协作频谱感知方法",
             "score": 0.95,
             "url": None,
             "content": """
-HAK 180 烫金机的操作面板位于机器正前方。
-开启电源后，您需要先设置温度，默认建议设置在 110℃ 左右。
-具体的操作面板布局请参考下图：
-![操作面板布局图](http://192.168.100.100:9000/knowledge-base/upload-images/hak180产品安全手册/048c005b198be5c9fff80ad6a6ba02496f38fa109ec20dbaabde3110f3eb1574.jpg)
+基于深度卷积神经网络的协作频谱感知方法将频谱感知建模为图像二分类问题。
+接收信号的协方差矩阵被转换为灰度图像，网络通过卷积层提取特征。
+为缓解深层网络的梯度消失问题，在卷积块之间引入捷径连接，其结构如下图：
+![DCNN 残差块结构](http://localhost:9000/knowledge-base/upload-images/基于深度卷积神经网络的协作频谱感知方法/example_block.jpg)
 
-如果是进行局部烫金，请调节侧面的旋钮。
-![侧面旋钮细节](http://192.168.100.100:9000/knowledge-base/upload-images/hak180产品安全手册/f77da4df52517fc50b9efb528540e1351dd1a08dce6f801cf08366540f2c59ce.jpg)
+网络整体由多个残差学习模块级联组成，如下图：
+![DCNN 整体网络结构](http://localhost:9000/knowledge-base/upload-images/基于深度卷积神经网络的协作频谱感知方法/example_network.jpg)
 """
         },
         {
             "chunk_id": None,
             "source": "web",
-            "title": "HAK 180 常见故障排除 - 官网",
+            "title": "分布式异构频谱感知 - 官网",
             "score": 0.88,
-            "url": "http://192.168.100.100:9000/knowledge-base/upload-images/%E5%8D%8E%E4%B8%BA%E6%93%8E%E4%BA%91G740%E7%94%A8%E6%88%B7%E6%8C%87%E5%8D%97-(KLVG-16Z,Windows11_02,zh-cn)/c28a751c315a89fb5f3b52736a7996b56971c9a260a0e2b850eb5ef18beabf3c.jpg",  # 这是一个直接指向图片的URL（虽然少见，但用于测试提取）
-            "content": "如果机器无法加热，请检查保险丝是否熔断..."
+            "url": "http://localhost:9000/knowledge-base/upload-images/example_web_image.jpg",  # 直接指向图片的URL（用于测试提取）
+            "content": "分布式架构下每个感知节点部署一个卷积神经网络，用于鉴别频谱占用状态..."
         },
         {
             "chunk_id": "local_102",
             "source": "local",
-            "title": "安全注意事项",
+            "title": "系统模型",
             "score": 0.82,
             "url": None,
-            "content": "操作时请务必佩戴隔热手套，避免高温烫伤。"
+            "content": "协作频谱感知中，多个次用户分别进行本地观测并将结果上报融合中心。"
         }
     ]
 
     # 模拟历史记录
     mock_history = [
-        {"role": "user", "text": "你好，这款机器怎么用？"},
-        {"role": "assistant", "text": "您好！请问您具体指的是哪一款机器？"},
-        {"role": "user", "text": "HAK 180 烫金机"}
+        {"role": "user", "text": "你好，这篇文献讲了什么？"},
+        {"role": "assistant", "text": "您好！请问您具体指的是哪一篇文献？"},
+        {"role": "user", "text": "基于深度卷积神经网络的协作频谱感知方法"}
     ]
 
     # 模拟输入状态
     mock_state = {
         "session_id": "test_answer_session_001",
-        "original_query": "HAK 180 烫金机怎么操作？",
-        "rewritten_query": "HAK 180 烫金机的具体操作步骤和面板设置方法",
-        "item_names": ["HAK180烫金机"],
+        "original_query": "DCNN 频谱感知方法的网络结构是什么？",
+        "rewritten_query": "基于深度卷积神经网络的协作频谱感知方法的网络结构与残差模块",
+        "item_names": ["基于深度卷积神经网络的协作频谱感知方法"],
         "history": mock_history,
         "reranked_docs": mock_reranked_docs,
         "is_stream": False,  # 测试非流式
@@ -416,4 +416,3 @@ HAK 180 烫金机的操作面板位于机器正前方。
     result = node_answer_output(mock_state)
 
     print(result)
-
