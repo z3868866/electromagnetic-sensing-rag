@@ -85,7 +85,7 @@ class NodeWebSearchMcp(NodeBase):
 if __name__ == "__main__":
 
     init_state = {
-        "rewritten_query": "关于brother HAK180烫金机，如何调节转印温度？"
+        "rewritten_query": "基于深度卷积神经网络的协作频谱感知方法，如何缓解梯度消失？"
     }
 
     # 执行节点的业务调用

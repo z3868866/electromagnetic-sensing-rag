@@ -71,14 +71,14 @@ def online_hybrid_search(
 # 字符串转义（防注入）
 '''
 Milvus 的过滤表达式长这样：
-expr = 'item_name == "HAK180"'
-如果产品名称里本身就包含引号呢？比如产品名叫 HAK"180：
+expr = 'item_name == "基于深度卷积神经网络的协作频谱感知方法"'
+如果文献名称里本身就包含引号呢？比如文献名叫 DCNN"Net：
 
 # ❌ 不转义：表达式被截断，Milvus 解析报错
-expr = 'item_name == "HAK"180"'
+expr = 'item_name == "DCNN"Net"'
 
 # ✅ 转义后：引号被加了反斜杠，Milvus 知道这是内容的一部分
-expr = 'item_name == "HAK\"180"'
+expr = 'item_name == "DCNN\"Net"'
 打个比方：就像你在网上填表单，名字里有个引号，系统会让你加个反斜杠转义，不然系统会把你的引号当成表单的分隔符，导致格式错乱。
 '''
 

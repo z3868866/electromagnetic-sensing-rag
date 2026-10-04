@@ -366,7 +366,7 @@ if __name__ == "__main__":
 
     setup_logging()
 
-    json_path = r"D:\output\hak180产品安全手册\chunks.json"
+    json_path = r"D:\output\基于深度卷积神经网络的协作频谱感知方法\chunks.json"
     with open(json_path, "r", encoding="utf-8") as f:
         chuncks_json = f.read()
 
@@ -374,7 +374,7 @@ if __name__ == "__main__":
 
     init_state = {
         "chunks": chuncks,
-        "file_title": "hak180产品安全手册"
+        "file_title": "基于深度卷积神经网络的协作频谱感知方法"
     }
 
     # 执行核心处理流程

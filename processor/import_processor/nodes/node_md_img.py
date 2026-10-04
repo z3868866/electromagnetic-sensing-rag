@@ -428,7 +428,7 @@ class NodeMDImg(BaseNode):
 if __name__ == "__main__":
     setup_logging()
 
-    md_path = r"D:\output\hak180产品安全手册\hak180产品安全手册.md"
+    md_path = r"D:\output\基于深度卷积神经网络的协作频谱感知方法\基于深度卷积神经网络的协作频谱感知方法.md"
     with open(md_path, "r", encoding="utf-8") as f:
         md_content = f.read()
 

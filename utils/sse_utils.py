@@ -123,7 +123,7 @@ A：因为 asyncio 事件循环用一个线程并发服务所有用户，而 que
 **Q4：SSE 一条消息的格式长什么样？结尾为什么要两个换行？**
 
 A：SSE 是纯文本协议，一条消息由 event 行和 data 行组成，格式是 `event: 事件名\ndata: JSON字符串\n\n`。
-data 里放 JSON 序列化后的业务数据，比如 `event: delta\ndata: {"text":"HAK180"}\n\n`。
+data 里放 JSON 序列化后的业务数据，比如 `event: delta\ndata: {"delta":"DCNN"}\n\n`。
 结尾必须是两个换行（一个空行），这是 SSE 协议规定的消息分隔符，浏览器的 EventSource 靠这个空行判断一条消息完整结束、可以分发给前端回调；
 少了这个空行，浏览器会认为消息还没收完，一直缓冲不触发事件。
 

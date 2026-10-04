@@ -219,17 +219,17 @@ def clear_history(session_id: str) -> int:
 if __name__ == "__main__":
     # # 测试代码
     # save_chat_message(
-    #     "test_session_id_001", "user", "请问这个怎么用？", "请问HAK180烫金机如何使用？"
+    #     "test_session_id_001", "user", "请问这个怎么用？", "请问DCNN如何缓解梯度消失？"
     # )
 
     # 测试会话，用于确认商品名称是否能正确的提取
     sid = "test_session_002"
     # 1. 写入用户消息
-    save_chat_message(sid, "user", "你好，有烫金机吗？")
+    save_chat_message(sid, "user", "你好，有频谱感知相关文献吗？")
     # 2. 写入助手回复
     save_chat_message(sid, "assistant", "你好！请问你想询问哪个型号？")
     # 3. 写入带关联商品的用户消息
-    save_chat_message(sid, "user", "brother的HAK180烫金机")
+    save_chat_message(sid, "user", "基于深度卷积神经网络的协作频谱感知方法")
     save_chat_message(sid, "assistant", "有的")
 
 
@@ -274,7 +274,7 @@ def get_recent_messages(session_id: str, limit: int = 10) -> List[Dict[str, Any]
 
 A：为了支持多轮对话的上下文理解和指代消解。
 用户第二轮常说"那它怎么复位""这个多少钱"，里面的"它""这个"指代上一轮提到的产品，脱离上下文根本无法检索。
-我按 session_id 把每轮消息存到 MongoDB，下一轮先取最近几条拼进提示词，LLM 才能把"那它怎么复位"还原成"HAK180 怎么复位"再去检索。
+我按 session_id 把每轮消息存到 MongoDB，下一轮先取最近几条拼进提示词，LLM 才能把"那它怎么缓解梯度消失"还原成"DCNN 怎么缓解梯度消失"再去检索。
 要注意对话历史和知识库是两回事：知识库是 Milvus 里长期、跨用户共享的手册切片，导入线构建；对话历史是 MongoDB 里临时、按会话隔离的聊天记录，聊天不会往知识库里写数据。
 
 ---

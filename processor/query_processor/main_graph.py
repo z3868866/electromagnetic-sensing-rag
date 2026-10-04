@@ -128,7 +128,7 @@ if __name__ == "__main__":
     # 初始化图状态
     init_state = {
         "session_id": "session_002",
-        "original_query": "怎么调节180烫金机的温度"
+        "original_query": "DCNN 如何缓解梯度消失"
     }
 
 

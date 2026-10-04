@@ -413,14 +413,14 @@ class NodeDocumentSplit(BaseNode):
 if __name__ == "__main__":
     setup_logging()
 
-    md_path = r"D:\output\hak180产品安全手册\hak180产品安全手册_new.md"
+    md_path = r"D:\output\基于深度卷积神经网络的协作频谱感知方法\基于深度卷积神经网络的协作频谱感知方法_new.md"
     with open(md_path, "r", encoding="utf-8") as f:
         md_content = f.read()
 
     init_state = {
         "md_path": md_path,
         "md_content": md_content,
-        "file_title": "hak180产品安全手册"
+        "file_title": "基于深度卷积神经网络的协作频谱感知方法"
     }
 
     # 执行核心处理流程

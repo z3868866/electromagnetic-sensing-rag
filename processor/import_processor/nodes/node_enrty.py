@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # 初始化图状态
     init_state = {
         "task_id": "task_test_001",
-        "import_file_path": r"D:\doc\hak180产品安全手册.pdf"
+        "import_file_path": r"D:\doc\基于深度卷积神经网络的协作频谱感知方法.pdf"
     }
 
     # 创建节点对象

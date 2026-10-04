@@ -259,7 +259,7 @@ if __name__ == "__main__":
 
     setup_logging()
 
-    json_path = r"D:\output\hak180产品安全手册\state_vector.json"
+    json_path = r"D:\output\基于深度卷积神经网络的协作频谱感知方法\state_vector.json"
     with open(json_path, "r", encoding="utf-8") as f:
         state_json = f.read()
 
