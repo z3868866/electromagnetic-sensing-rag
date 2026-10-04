@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>SSE场景三</title></head>
+<body>
+  <h3>提交任务，SSE接收后台结果</h3>
+  <input type="text" id="sessionIdInput" value="test001">
+  <button onclick="submitTask()">提交任务</button>
+  <div id="result"></div>
+  <script>
+    let eventSource = null;
+    async function submitTask() {
+      const sessionId = document.getElementById("sessionIdInput").value;
+      document.getElementById("result").innerHTML = "";
+
+      await fetch(`http://127.0.0.1:8001/submit/${sessionId}`);
+
+      eventSource = new EventSource(`http://127.0.0.1:8001/stream/${sessionId}`);
+      eventSource.onmessage = function (event) {
+        document.getElementById("result").innerHTML += event.data + "<br>";
+      };
+    }
+  </script>
+</body>
+</html>

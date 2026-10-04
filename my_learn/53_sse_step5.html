@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>SSE场景五</title></head>
+<body>
+  <h3>事件分类：进度与答案分开显示</h3>
+  <input type="text" id="sessionIdInput" value="query001"><br><br>
+  <textarea id="questionInput" rows="2" cols="50">DCNN如何缓解梯度消失？</textarea><br>
+  <button onclick="submitQuery()">提交问题</button>
+
+  <p>状态：<span id="status" style="color:#888;">等待中…</span></p>
+  <div id="answer" style="white-space:pre-wrap;border:1px solid #ddd;padding:10px;min-height:60px;"></div>
+
+  <script>
+    let eventSource = null;
+    async function submitQuery() {
+      const sessionId = document.getElementById("sessionIdInput").value;
+      const question = document.getElementById("questionInput").value;
+      document.getElementById("status").textContent = "等待中…";
+      document.getElementById("answer").textContent = "";
+
+      await fetch("http://127.0.0.1:8001/query", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({session_id: sessionId, question: question})
+      });
+
+      eventSource = new EventSource(`http://127.0.0.1:8001/stream/${sessionId}`);
+
+      eventSource.addEventListener("progress", function (e) {
+        document.getElementById("status").textContent = e.data;
+      });
+      eventSource.addEventListener("answer", function (e) {
+        document.getElementById("answer").textContent += e.data;
+      });
+      eventSource.addEventListener("complete", function (e) {
+        document.getElementById("status").textContent = e.data;
+        eventSource.close();
+      });
+    }
+  </script>
+</body>
+</html>

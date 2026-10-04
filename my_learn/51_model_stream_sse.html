@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>模型流式+SSE</title></head>
+<body>
+  <h3>模型流式问答</h3>
+  <input type="text" id="q" size="50"
+         value="用三句话解释什么是残差网络，以及它如何缓解梯度消失">
+  <button onclick="ask()">提问</button>
+  <div id="answer" style="white-space:pre-wrap;margin-top:12px;"></div>
+
+  <script>
+    let es = null;
+    function ask() {
+      if (es) es.close();
+      const q = encodeURIComponent(document.getElementById("q").value);
+      const box = document.getElementById("answer");
+      box.textContent = "";
+
+      es = new EventSource(`http://127.0.0.1:8001/answer_stream?question=${q}`);
+
+      es.onmessage = function (event) {
+        box.textContent += JSON.parse(event.data);
+      };
+      es.addEventListener("final", function () { es.close(); });
+      es.onerror = function () { es.close(); };
+    }
+  </script>
+</body>
+</html>

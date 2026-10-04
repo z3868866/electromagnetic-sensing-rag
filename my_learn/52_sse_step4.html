@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>SSE场景四</title></head>
+<body>
+  <h3>POST提交问题，SSE接收答案</h3>
+  <input type="text" id="sessionIdInput" value="query001"><br><br>
+  <textarea id="questionInput" rows="3" cols="50">DCNN如何缓解梯度消失？</textarea><br>
+  <button onclick="submitQuery()">提交问题</button>
+  <div id="result"></div>
+
+  <script>
+    let eventSource = null;
+    async function submitQuery() {
+      const sessionId = document.getElementById("sessionIdInput").value;
+      const question = document.getElementById("questionInput").value;
+      document.getElementById("result").innerHTML = "";
+
+      await fetch("http://127.0.0.1:8001/query", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({session_id: sessionId, question: question})
+      });
+
+      eventSource = new EventSource(`http://127.0.0.1:8001/stream/${sessionId}`);
+      eventSource.onmessage = function (event) {
+        document.getElementById("result").innerHTML += event.data + "<br>";
+      };
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>SSE场景一</title></head>
+<body>
+  <h3>接收服务器推送</h3>
+  <div id="result"></div>
+  <script>
+    const es = new EventSource("http://127.0.0.1:8001/simple_stream");
+    es.onmessage = function (event) {
+      document.getElementById("result").innerHTML += event.data + "<br>";
+    };
+  </script>
+</body>
+</html>

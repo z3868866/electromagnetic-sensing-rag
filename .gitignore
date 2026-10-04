@@ -1,0 +1,53 @@
+# ===== 密钥 / 环境变量（绝不提交真实值）=====
+.env
+.env.*
+!.env.example
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ===== 虚拟环境 =====
+.venv/
+venv/
+env/
+ENV/
+
+# ===== IDE / 系统 =====
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ===== 运行日志与产物 =====
+logs/
+log/
+temp-files/
+tmp/
+output/
+**/output/
+*.log
+*.log.*
+
+# ===== 数据 / 二进制 =====
+*.zip
+*.pdf
+file/
+data/
+
+# ===== 个人学习笔记与基础练习（非项目本体）=====
+1.笔记/
+test/
+images/
+
+# ===== my_learn 内的日志与产物（保留 .py / .html / eval）=====
+my_learn/**/*.txt
+my_learn/output/
+
+# ===== 根目录临时脚本与求职材料 =====
+troch_gpu_test.py
+电磁感知知识库RAG项目-简历与面试.md
