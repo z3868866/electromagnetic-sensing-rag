@@ -32,7 +32,7 @@ def create_default_state(**overrides) -> QueryGraphState:
 
 # ---- 7 个骨架节点（打印 + 模拟耗时 + 返回占位数据）----
 def node_confirm(state):
-    print("【节点1 产品确认】")
+    print("【节点1 文献确认】")
     return {"rewritten_query": state["original_query"],
             "item_names": ["基于DCNN的协作频谱感知方法"]}
 

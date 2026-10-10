@@ -49,7 +49,7 @@ class KBImportWorkflow:
         graph.add_node("node_pdf_to_md", NodePDFToMD())#pdf转换为markdown
         graph.add_node("node_md_img", NodeMDImg())#解析文档中的图片的含义，并将其嵌入文档中
         graph.add_node("node_document_split", NodeDocumentSplit())#文档切分
-        graph.add_node("node_item_name_recognition", NodeItemNameRecognition())#识别商品名称
+        graph.add_node("node_item_name_recognition", NodeItemNameRecognition())#识别文献名称
         graph.add_node("node_bge_embedding", NodeBGEEmbedding())#将文本转成向量
         graph.add_node("node_import_milvus", NodeImportMilvus())#将向量和标量存入milvus
 

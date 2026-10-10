@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient, ASCENDING, DESCENDING
 
 '''
-这段代码就是对话记录的 CRUD（增删改查）：save 存消息、update 补商品名、get 查最近对话、clear 清空历史。
+这段代码就是对话记录的 CRUD（增删改查）：save 存消息、update 补文献名、get 查最近对话、clear 清空历史。
 底层用 MongoDB 存储，用 session_id 区分不同会话，
 用 ts 时间戳排序。整个类用单例模式管理数据库连接，索引优化了"按会话查最新消息"的查询性能。
 '''
@@ -90,7 +90,7 @@ def save_chat_message(
     :param role: 消息角色，固定值：user（用户）/assistant（助手）
     :param text: 对话核心内容，用户的提问或助手的回答
     :param rewritten_query: 重写后的查询语句（可选，用于检索增强等场景，默认空字符串）
-    :param item_names: 关联的商品名称列表（可选，支持多商品，默认None）
+    :param item_names: 关联的文献名称列表（可选，支持多文献，默认None）
     :param image_urls: 关联的图片URL列表（可选，默认None）
     :param message_id: 记录主键ID（可选，有值则更新，无值则新增）
     :return: 插入/更新的记录唯一标识（新增返回ObjectId字符串，更新返回传入的message_id）
@@ -104,7 +104,7 @@ def save_chat_message(
         "role": role,  # 消息角色
         "text": text,  # 消息内容
         "rewritten_query": rewritten_query or "",  # 问题优化后的改写，空值处理为空字符串
-        "item_names": item_names,  # 关联商品名称列表
+        "item_names": item_names,  # 关联文献名称列表
         "image_urls": image_urls,  # 关联图片URL列表
         "ts": ts  # 时间戳，排序和时间筛选维度
     }
@@ -133,11 +133,11 @@ def save_chat_message(
 
 def update_message_item_names(ids: List[str], item_names: List[str]) -> int:
     """
-    对话过程中，系统识别出用户提到了哪些商品，然后回头更新之前的对话记录，把商品名补上去。
+    对话过程中，系统识别出用户提到了哪些文献，然后回头更新之前的对话记录，把文献名补上去。
 
-    批量更新历史会话记录的关联商品名称
+    批量更新历史会话记录的关联文献名称
     :param ids: 要更新的记录主键ID列表（字符串类型）
-    :param item_names: 要设置的新商品名称列表
+    :param item_names: 要设置的新文献名称列表
     :return: 实际更新的文档数量，更新失败返回0
     """
     # 获取全局的HistoryMongoTool实例，使用单例模式
@@ -151,9 +151,9 @@ def update_message_item_names(ids: List[str], item_names: List[str]) -> int:
             {
                 "_id": {"$in": object_ids}# 主键在指定的ID列表中（批量筛选） $in 就是"在……里面"的意思。相当于 SQL 的 WHERE _id IN (id1, id2, id3)。一次更新多条记录。
             },
-            {"$set": {"item_names": item_names}}  # 更新操作：设置新的商品名称列表
+            {"$set": {"item_names": item_names}}  # 更新操作：设置新的文献名称列表
         )
-        # 记录更新成功日志，包含更新数量和新的商品名称
+        # 记录更新成功日志，包含更新数量和新的文献名称
         logging.info(f"Updated {result.modified_count} records to item_names: {item_names}")
         # 返回实际更新的数量（modified_count：真正被修改的文档数，区别于matched_count）
         return result.modified_count
@@ -222,13 +222,13 @@ if __name__ == "__main__":
     #     "test_session_id_001", "user", "请问这个怎么用？", "请问DCNN如何缓解梯度消失？"
     # )
 
-    # 测试会话，用于确认商品名称是否能正确的提取
+    # 测试会话，用于确认文献名称是否能正确的提取
     sid = "test_session_002"
     # 1. 写入用户消息
     save_chat_message(sid, "user", "你好，有频谱感知相关文献吗？")
     # 2. 写入助手回复
-    save_chat_message(sid, "assistant", "你好！请问你想询问哪个型号？")
-    # 3. 写入带关联商品的用户消息
+    save_chat_message(sid, "assistant", "你好！请问你想询问哪篇文献？")
+    # 3. 写入带关联文献的用户消息
     save_chat_message(sid, "user", "基于深度卷积神经网络的协作频谱感知方法")
     save_chat_message(sid, "assistant", "有的")
 
@@ -273,9 +273,9 @@ def get_recent_messages(session_id: str, limit: int = 10) -> List[Dict[str, Any]
 **Q1：RAG 问答为什么要存对话历史？不存会怎样？**
 
 A：为了支持多轮对话的上下文理解和指代消解。
-用户第二轮常说"那它怎么复位""这个多少钱"，里面的"它""这个"指代上一轮提到的产品，脱离上下文根本无法检索。
+用户第二轮常说"那它的结构呢""这个方法怎么实现"，里面的"它""这个"指代上一轮提到的文献，脱离上下文根本无法检索。
 我按 session_id 把每轮消息存到 MongoDB，下一轮先取最近几条拼进提示词，LLM 才能把"那它怎么缓解梯度消失"还原成"DCNN 怎么缓解梯度消失"再去检索。
-要注意对话历史和知识库是两回事：知识库是 Milvus 里长期、跨用户共享的手册切片，导入线构建；对话历史是 MongoDB 里临时、按会话隔离的聊天记录，聊天不会往知识库里写数据。
+要注意对话历史和知识库是两回事：知识库是 Milvus 里长期、跨用户共享的文献切片，导入线构建；对话历史是 MongoDB 里临时、按会话隔离的聊天记录，聊天不会往知识库里写数据。
 
 ---
 

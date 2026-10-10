@@ -33,7 +33,7 @@ class ImportGraphState(TypedDict):
 
     # ==================== 文件信息 ====================
     file_title: str                 # 文件标题（不含扩展名）
-    item_name: str                  # 识别出的商品/产品名称
+    item_name: str                  # 识别出的文献名称（规范文献名）
 
     # ==================== 处理中间数据 ====================
     md_content: str                 # Markdown 文档内容

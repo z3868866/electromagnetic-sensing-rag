@@ -94,9 +94,9 @@ async def sse_generator(session_id: str, request: Request) -> AsyncGenerator[str
 
 **Q1：为什么用 SSE 而不是普通 HTTP 一次性返回？它和 WebSocket 有什么区别？**
 
-A：RAG 问答链路很长，要经过产品确认、向量检索、融合、重排、LLM 生成，可能耗时十几秒。
+A：RAG 问答链路很长，要经过文献确认、向量检索、融合、重排、LLM 生成，可能耗时十几秒。
 如果用普通 HTTP 憋到最后一次性返回，用户只能对着加载圈干等，体验很差也不知道系统是否在工作。
-SSE（Server-Sent Events）是服务器单向推送技术，连接建立后服务器可以持续把"正在确认产品/正在检索/正在重排"的节点进度，以及 LLM 的流式 token 一条条推给前端，实现进度条加打字机效果。
+SSE（Server-Sent Events）是服务器单向推送技术，连接建立后服务器可以持续把"正在确认文献/正在检索/正在重排"的节点进度，以及 LLM 的流式 token 一条条推给前端，实现进度条加打字机效果。
 它和 WebSocket 的区别是：SSE 是单向的（只有服务器到浏览器）、基于普通 HTTP、轻量、浏览器原生支持；WebSocket 是全双工双向通信、协议更重。本场景只需要服务器往外推，所以 SSE 更合适。
 
 ---

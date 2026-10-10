@@ -98,15 +98,15 @@ class NodeItemNameConfirm(NodeBase):
     def _step_4_extract_info(self, original_query, history):
 
         """
-       利用LLM从当前问题以及历史会话中提取出主要询问的商品名称item_names（可多个，JSON列表形式）
-       若商品名不够明确则返回空列表，同时根据上下文重新改写问题，保证问题独立完整
+       利用LLM从当前问题以及历史会话中提取出主要询问的文献名称item_names（可多个，JSON列表形式）
+       若文献名不够明确则返回空列表，同时根据上下文重新改写问题，保证问题独立完整
        :param query: 字符串 - 用户当前原始查询问题（如："这个多少钱？"）
        :param history: 列表[字典] - 近期会话历史，每条消息含role/text等字段，
                        格式：[{"role": "user/assistant", "text": "消息内容", "_id": "消息ID"}, ...]
        :return: 字典 - 提取结果，固定包含2个字段，格式：
                 {
-                    "item_names": ["商品名1", "商品名2", ...],  # 提取的商品名列表，无则空列表
-                    "rewritten_query": "改写后的完整问题"       # 包含商品名的独立问题，无则返回原始query
+                    "item_names": ["文献名1", "文献名2", ...],  # 提取的文献名列表，无则空列表
+                    "rewritten_query": "改写后的完整问题"       # 包含文献名的独立问题，无则返回原始query
                 }
        """
 
@@ -177,7 +177,7 @@ class NodeItemNameConfirm(NodeBase):
         except Exception as e:
             # 捕获所有异常（如LLM调用失败、JSON解析失败等），记录错误日志
             logger.error(f"大模型调用异常：{e}")
-            # 异常时返回默认结果：空商品名列表+原始查询
+            # 异常时返回默认结果：空文献名列表+原始查询
             return {"item_names": [], "rewritten_query": None}
 
     def _step_4b_exact_alias_match(self, item_names) -> dict:
@@ -261,21 +261,21 @@ class NodeItemNameConfirm(NodeBase):
 
     def _step_6_align_item_names(self, query_results) -> dict:
         """
-        6 根据Milvus搜索评分，逐个对齐step4提取的item_names，生成「确认商品名」和「候选商品名」以及 [没有可选商品]
+        6 根据Milvus搜索评分，逐个对齐step4提取的item_names，生成「确认文献名」和「候选文献名」以及 [没有可选文献]
         对齐规则（优先级a>b>c>d）：
-                # a  如果只有一个匹配结果评分高于0.85 → 直接确认该商品名
+                # a  如果只有一个匹配结果评分高于0.85 → 直接确认该文献名
                 # b  如果多条匹配结果评分超过0.85 → 优先取与原始提取名相同的，无则取分数最高的
                 优化 ab 所有评分高于0.85的都可以直接确认
                 c  如果无0.85分以上结果 → 取分数≥0.6的最高前5个作为候选
-                d  如果无0.6分及以上结果 → 不返回任何商品名（确认+候选均为空）
-        :param query_results: 列表[字典] - step5的返回结果，每个商品名的搜索匹配数据（格式同step5返回值）
-        :return: 字典 - 商品名对齐结果，包含确认列表和候选列表，格式：
+                d  如果无0.6分及以上结果 → 不返回任何文献名（确认+候选均为空）
+        :param query_results: 列表[字典] - step5的返回结果，每个文献名的搜索匹配数据（格式同step5返回值）
+        :return: 字典 - 文献名对齐结果，包含确认列表和候选列表，格式：
                  {
-                     "confirmed_item_names": ["确认商品名1", "确认商品名2"],  # 去重后的确认商品名，无则空列表
-                     "options": ["候选商品名1", "候选商品名2", ...]          # 去重后的候选商品名，无则空列表
+                     "confirmed_item_names": ["确认文献名1", "确认文献名2"],  # 去重后的确认文献名，无则空列表
+                     "options": ["候选文献名1", "候选文献名2", ...]          # 去重后的候选文献名，无则空列表
                  }
         """
-        # 1. 初始化商品名列表
+        # 1. 初始化文献名列表
         # 确认的
         confirmed_item_names: List[str] = []
         # 候选的
@@ -301,7 +301,7 @@ class NodeItemNameConfirm(NodeBase):
                     confirmed_item_names.append(m.get("item_name"))
                 continue
             # 筛选高置信度等分的结果： >= 0.65
-            # # a  如果只有一个匹配结果评分高于0.85 → 直接确认该商品名
+            # # a  如果只有一个匹配结果评分高于0.85 → 直接确认该文献名
             # if len(high) == 1:
             #     confirmed_item_names.append(high[0].get("item_name"))
             #     continue
@@ -329,7 +329,7 @@ class NodeItemNameConfirm(NodeBase):
                 for m in mid[:3]:
                     options.append(m.get("item_name"))
 
-            # d  如果无0.6分及以上结果 → 不返回任何商品名（确认+候选均为空）
+            # d  如果无0.6分及以上结果 → 不返回任何文献名（确认+候选均为空）
             # pass
 
 
@@ -341,20 +341,20 @@ class NodeItemNameConfirm(NodeBase):
 
     def _step_7_check_confirmation(self, state, align_result, history):
         """
-        7 检查step6对齐后的商品名状态，分3种分支更新state，并同步更新历史消息的商品名关联
+        7 检查step6对齐后的文献名状态，分3种分支更新state，并同步更新历史消息的文献名关联
         :param state: 字典 - 原始会话状态，包含session_id/original_query等核心字段
         :param align_result: 字典 - step6的对齐结果
         :param history: 列表[字典] - 近期会话历史
         :return: 字典 - 更新后的会话状态，包含item_names/answer
         """
 
-        # 1. 从对齐结果中获取确认的商品名列表，无，则返回空列表
+        # 1. 从对齐结果中获取确认的文献名列表，无，则返回空列表
         confirmed = align_result.get("confirmed_item_names", [])
 
-        # 2. 从对齐结果中获取候选的商品名列表，无，则返回空列表
+        # 2. 从对齐结果中获取候选的文献名列表，无，则返回空列表
         options = align_result.get("options", [])
 
-        # **分支A（有确认商品）**：更新 State 中的 `item_names`，并批量回填历史消息中缺失的商品名关联。
+        # **分支A（有确认文献）**：更新 State 中的 `item_names`，并批量回填历史消息中缺失的文献名关联。
         if confirmed:
 
             # 获取历史记录的id列表
@@ -382,14 +382,14 @@ class NodeItemNameConfirm(NodeBase):
 
             return state
 
-        # **分支C（无结果）**：生成拒识回复（如“未找到相关产品...”），写入 State 的 `answer` 字段。
+        # **分支C（无结果）**：生成拒识回复（如“未找到相关文献...”），写入 State 的 `answer` 字段。
         state["answer"] = "未找到相关文献，请提供准确的文献或方法名称。"
         state["item_names"] = []
         return state
 
     def _step_8_write_history(self, state, session_id, rewritten_query, message_id):
         """
-         8 把本次处理的核心信息（用户问题、助手答案、商品名、改写查询）写入MongoDB的会话历史
+         8 把本次处理的核心信息（用户问题、助手答案、文献名、改写查询）写入MongoDB的会话历史
          包含2个核心操作：1. 写入助手答案（若有）；2. 更新用户原始问题的关联信息
          :param state: 字典 - step6更新后的会话状态，包含answer/item_names等字段
          :param session_id: 字符串 - 会话唯一标识
