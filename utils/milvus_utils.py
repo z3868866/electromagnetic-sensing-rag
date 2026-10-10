@@ -53,7 +53,9 @@ def online_hybrid_search(
         limit=limit
     )
 
-    ranker = WeightedRanker(ranker_weights[0], ranker_weights[1])
+    # norm_score=True：先把两路分数各自归一化到 0~1 再加权，
+    # 避免 dense 的 COSINE 分（0~1）与 BM25 分（量纲不同）裸加权导致权重失真
+    ranker = WeightedRanker(ranker_weights[0], ranker_weights[1], norm_score=True)
 
     kwargs = dict(
         collection_name=collection_name,
@@ -95,6 +97,24 @@ def escape_milvus_string(value: str) -> str:
     # 转义反斜杠（\ → \\） 双引号（" → \"） 单引号（' → \'）
     value = value.replace("\\", "\\\\").replace('"', '\\"').replace("'", "\\'")
     return value
+
+
+def build_item_name_expr(item_names) -> str:
+    """
+    构造 Milvus 元数据过滤表达式：把检索范围限定在指定文献的切片内。
+      - 所有名称经 escape_milvus_string 转义后用双引号包裹，防止名称中的引号
+        破坏表达式语法（与 SQL 注入同构的 filter injection 风险）；
+      - item_names 为字符串时自动包成单元素列表，兼容上游异常结构。
+    :param item_names: 文献标准名列表（或单个字符串）
+    :return: 形如 chunk_level=="child" and item_name in ["名称1", "名称2"] 的表达式
+    """
+    if isinstance(item_names, str):
+        item_names = [item_names]
+    names = [escape_milvus_string(str(n)) for n in (item_names or []) if n]
+    if not names:
+        return 'chunk_level=="child"'
+    quoted = ", ".join(f'"{n}"' for n in names)
+    return f'chunk_level=="child" and item_name in [{quoted}]'
 
 
 # 构建搜索请求（准备"搜查令"）

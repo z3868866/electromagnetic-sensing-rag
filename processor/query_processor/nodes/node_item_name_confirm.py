@@ -47,7 +47,8 @@ class NodeItemNameConfirm(NodeBase):
         extract_res = self._step_4_extract_info(original_query, history)
         
         item_names = extract_res.get("item_names")
-        rewritten_query = extract_res.get("rewritten_query", original_query)
+        # 用 or 兜底：键缺失或为 None/空串时都退回原始问题，保证下游拿到的改写问题永远非空
+        rewritten_query = extract_res.get("rewritten_query") or original_query
         # 更新状态
         state["rewritten_query"] = rewritten_query
 
@@ -148,8 +149,7 @@ class NodeItemNameConfirm(NodeBase):
 
             # 5. 数据清洗：去掉可能的代码围栏（```json 和 ```）
             if content.startswith("```json"):
-                # content = content[6:]
-                content.replace("```json", "").replace("```", "")
+                content = content.replace("```json", "").replace("```", "")
 
             # 6. JSON数据的解析（将JSON字符串转换为字典）
             result = json.loads(content)
@@ -157,11 +157,11 @@ class NodeItemNameConfirm(NodeBase):
             # 7. 健壮性判断：确保返回结果包含item_names和rewritten_query字段
             if "item_names" not in result:
                 logger.warning("大模型返回结果缺少item_names字段")
-                result = {"item_names": []}
+                result["item_names"] = []
 
             if "rewritten_query" not in result:
                 logger.warning("大模型返回结果缺少rewritten_query字段")
-                result = {"rewritten_query": original_query}
+                result["rewritten_query"] = original_query
 
             result["item_names"] = [
                 name
@@ -177,8 +177,8 @@ class NodeItemNameConfirm(NodeBase):
         except Exception as e:
             # 捕获所有异常（如LLM调用失败、JSON解析失败等），记录错误日志
             logger.error(f"大模型调用异常：{e}")
-            # 异常时返回默认结果：空文献名列表+原始查询
-            return {"item_names": [], "rewritten_query": None}
+            # 异常时返回默认结果：空文献名列表+原始查询（字段必须完整，禁止返回 None）
+            return {"item_names": [], "rewritten_query": original_query}
 
     def _step_4b_exact_alias_match(self, item_names) -> dict:
         """
@@ -193,12 +193,24 @@ class NodeItemNameConfirm(NodeBase):
             return ("" if s is None else str(s)).replace(" ", "").replace("　", "").lower()
 
         confirmed, remaining = {}, []
+        # 分页拉全量词典：query 单次 limit 有上限，循环 offset 翻页避免静默截断；
+        # 加安全上限防止异常情况下无限翻页
+        ALIAS_PAGE_SIZE = 1000
+        ALIAS_MAX_ROWS = 100_000
+        rows = []
         try:
-            rows = milvus_client.query(
-                coll, filter="name_id >= 0", limit=1000,
-                output_fields=["item_name", "aliases"],
-                consistency_level="Strong",
-            )
+            offset = 0
+            while len(rows) < ALIAS_MAX_ROWS:
+                batch = milvus_client.query(
+                    coll, filter="name_id >= 0",
+                    limit=ALIAS_PAGE_SIZE, offset=offset,
+                    output_fields=["item_name", "aliases"],
+                    consistency_level="Strong",
+                )
+                rows.extend(batch)
+                if len(batch) < ALIAS_PAGE_SIZE:
+                    break
+                offset += len(batch)
         except Exception as e:
             logger.warning(f"别名词典加载失败，退到向量检索：{e}")
             rows = []

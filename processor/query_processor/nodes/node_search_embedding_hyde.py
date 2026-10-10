@@ -6,7 +6,7 @@ from processor.query_processor.state import QueryGraphState
 from tool.logger import logger
 from utils.json_format_utils import serialize_json
 from utils.llm_utils import get_llm_client
-from utils.milvus_utils import get_milvus_client, online_hybrid_search
+from utils.milvus_utils import get_milvus_client, online_hybrid_search, build_item_name_expr
 from utils.task_utils import add_done_task
 
 
@@ -86,8 +86,8 @@ class NodeSearchEmbeddingHyde(NodeBase):
             # 1. 拼接字符串
             combined_text = rewritten_query + " " + hyde_doc
 
-            # 2. 过滤表达式：仅在已确认文献的切片范围内检索
-            expr = f'chunk_level=="child" and item_name in {item_names}'
+            # 2. 过滤表达式：仅在已确认文献的切片范围内检索（名称统一转义，防注入）
+            expr = build_item_name_expr(item_names)
 
             # 3. 在线混合检索 kb_chunks
             client = get_milvus_client()
